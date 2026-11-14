@@ -1,6 +1,6 @@
-// Your Pulse account on the website: sign in, forgot password, and the account page
-// (profile, email, password, public playlists, sign out, delete). New accounts are made
-// in the app. Everything shown is written as text, never as HTML.
+// Your Pulse account on the website: sign up, sign in, forgot password, and the account page
+// (profile, email, password, public playlists, sign out, delete). Accounts made here are the
+// same accounts the app uses. Everything shown is written as text, never as HTML.
 //
 // Signed in, the key is kept in this browser (localStorage "pulse-session"), and sent to
 // the accounts server in a header. Signing out deletes it there and here.
@@ -9,6 +9,10 @@
   var ACCOUNTS = "https://pulse-accounts.y0hyotuube.workers.dev";
   try { ACCOUNTS = localStorage.getItem("pulse-dev-accounts") || ACCOUNTS; } catch (e) {} // local testing only
   var KEY = "pulse-session";
+  var TURNSTILE_SITE_KEY = "0x4AAAAAAF6OITIxlZXDQjk2"; // the same widget as the Ask box
+  // On a local copy (localhost), Cloudflare's test key, which always passes, so the pages can be tried.
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) TURNSTILE_SITE_KEY = "1x00000000000000000000AA";
+  var NO_SIGNUP = "pulse-no-signup"; // someone said they're under 13 in this browser
   var page = document.getElementById("page");
 
   // ------------------------------------------------------------------ helpers
@@ -51,7 +55,11 @@
           if (r.status === 401 && j.error === "Please sign in again.") { setSession(null); signIn("You were signed out. Please sign in again."); }
           throw new Error(j.error || "Something went wrong (" + r.status + ").");
         });
-      }, function () { throw new Error("Couldn't reach Pulse. Check your connection and try again."); });
+      }, function () {
+        // A local copy of the site: the real server only answers Pulse's own website.
+        if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) throw new Error("This is a local copy of the site, so the real Pulse server won't answer it. Everything up to here works.");
+        throw new Error("Couldn't reach Pulse. Check your connection and try again.");
+      });
   }
   function field(label, id, type, extra) {
     var input = el("input", Object.assign({ id: id, name: id, type: type || "text" }, extra || {}));
@@ -94,8 +102,108 @@
         }),
         el("div", { class: "row" }, [el("button", { class: "link", type: "button", text: "Forgot password?", onclick: function () { forgot(); } })]),
       ]),
-      el("p", { style: "margin-top:1.2rem" }, ["No account yet? Create one in the Pulse app: Settings → Account. ", el("a", { href: "../download/", text: "Get Pulse" })]),
+      el("p", { style: "margin-top:1.2rem" }, ["No account yet? ", el("button", { class: "link", type: "button", text: "Create one", onclick: function () { signUp(); } })]),
     ], "#who");
+  }
+
+  // ------------------------------------------------------------------ sign up
+  // Two steps, like most sites: the account and the anti-spam check, then your birthday and
+  // the Terms. The birthday is only checked (13 and older), never stored.
+  var turnstileLoading = null;
+  function loadTurnstile() {
+    if (!turnstileLoading) {
+      turnstileLoading = new Promise(function (ok, fail) {
+        var s = el("script", { src: "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit", async: "" });
+        s.onload = ok;
+        s.onerror = function () { turnstileLoading = null; fail(new Error("The anti-spam check couldn't load. Reload the page and try again.")); };
+        document.head.appendChild(s);
+      });
+    }
+    return turnstileLoading;
+  }
+  // Whole years from a "YYYY-MM-DD" birthday to today, or null for a date in the future.
+  function ageOn(birth) {
+    var p = birth.split("-").map(Number), now = new Date();
+    var y = now.getFullYear(), m = now.getMonth() + 1, d = now.getDate();
+    if (p[0] > y || (p[0] === y && (p[1] > m || (p[1] === m && p[2] > d)))) return null;
+    var age = y - p[0];
+    if (m < p[1] || (m === p[1] && d < p[2])) age--;
+    return age > 120 ? null : age;
+  }
+  function blocked() { try { return localStorage.getItem(NO_SIGNUP) === "1"; } catch (e) { return false; } }
+  var tooYoung = "You need to be at least 13 to make a Pulse account.";
+
+  function signUp(saved, note) {
+    document.title = "Create an account · Pulse";
+    if (blocked()) {
+      show([el("h1", { text: "Create a Pulse account" }), msg("bad", tooYoung), el("div", { class: "row" }, [el("a", { class: "b", href: "../", text: "Back to Pulse" })])]);
+      return;
+    }
+    var s = saved || {};
+    var token = null;
+    var box = el("div", { class: "human", "aria-label": "Anti-spam check" });
+    show([
+      el("h1", { text: "Create a Pulse account" }),
+      el("p", { text: "The same account works in the Pulse app. You need one only to share playlists and have a profile." }),
+      note ? msg("bad", note) : null,
+      el("div", { class: "card" }, [
+        form(field("Username", "user", "text", { autocomplete: "username", value: s.username || "", maxlength: "20" })
+          .concat([el("p", { class: "hint", text: "3–20 letters, numbers, _ or . Anyone can see it." })])
+          .concat(field("Email", "mail", "email", { autocomplete: "email", value: s.email || "" }))
+          .concat([el("p", { class: "hint", text: "Only for resetting your password. Never shown." })])
+          .concat(field("Password", "p1", "password", { autocomplete: "new-password" }))
+          .concat(field("Password again", "p2", "password", { autocomplete: "new-password" }))
+          .concat([box]), "Continue", function (f) {
+          var user = v(f, "user").trim().toLowerCase(), mail = v(f, "mail").trim().toLowerCase(), p1 = v(f, "p1"), p2 = v(f, "p2");
+          need(/^[a-z0-9_.]{3,20}$/.test(user), "Usernames are 3 to 20 letters, numbers, _ or .");
+          need(/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail), "That email address doesn't look right.");
+          need(p1.length >= 8, "Passwords need at least 8 characters.");
+          need(p1 === p2, "The two passwords don't match.");
+          need(token, "Please finish the anti-spam check.");
+          finishSignUp({ username: user, email: mail, password: p1, turnstile: token });
+        }),
+      ]),
+      el("p", { style: "margin-top:1.2rem" }, ["Have an account? ", el("button", { class: "link", type: "button", text: "Sign in", onclick: function () { signIn(); } })]),
+    ], "#user");
+    loadTurnstile().then(function () {
+      window.turnstile.render(box, {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: document.documentElement.dataset.theme === "light" ? "light" : "dark",
+        size: "flexible",
+        callback: function (t) { token = t; },
+        "expired-callback": function () { token = null; },
+        "error-callback": function () { token = null; },
+      });
+    }, function (err) { box.appendChild(msg("bad", err.message)); });
+  }
+
+  function finishSignUp(acct) {
+    document.title = "One more step · Pulse";
+    var max = new Date().toISOString().slice(0, 10);
+    var agree = el("input", { id: "agree", type: "checkbox" });
+    show([
+      el("h1", { text: "One more step" }),
+      el("p", { text: "Pulse accounts are for people 13 and older. We only use your birthday to check that; it isn't saved." }),
+      el("div", { class: "card" }, [
+        form(field("Birthday", "birth", "date", { autocomplete: "bday", max: max, min: "1900-01-01" })
+          .concat([el("label", { class: "check", for: "agree" }, [agree, el("span", {}, ["I agree to the ", el("a", { href: "../terms/", target: "_blank", text: "Terms of Service" }), " and the ", el("a", { href: "../privacy/", target: "_blank", text: "Privacy Policy" }), "."])])]), "Create account", function (f) {
+          var birth = v(f, "birth");
+          need(/^\d{4}-\d{2}-\d{2}$/.test(birth), "Enter your birthday.");
+          var age = ageOn(birth);
+          need(age !== null, "Enter your birthday.");
+          // Checked here first (the server checks again): under 13 can't sign up in this browser.
+          if (age < 13) { try { localStorage.setItem(NO_SIGNUP, "1"); } catch (e) {} signUp(); return; }
+          need(agree.checked, "Please agree to the Terms of Service and Privacy Policy.");
+          return api("POST", "/signup", Object.assign({ birthdate: birth, agree: true }, acct)).then(signedIn, function (err) {
+            if (/13/.test(err.message)) { try { localStorage.setItem(NO_SIGNUP, "1"); } catch (e) {} signUp(); return; }
+            // The anti-spam pass works once: anything that sends you back gets a new one.
+            if (/anti-spam|taken|email/i.test(err.message)) { signUp(acct, err.message); return; }
+            throw err;
+          });
+        }),
+      ]),
+      el("div", { class: "row" }, [el("button", { class: "link", type: "button", text: "Back", onclick: function () { signUp(acct); } })]),
+    ], "#birth");
   }
   function signedIn(j) {
     setSession({ token: j.token, username: j.user.username });
@@ -243,5 +351,5 @@
     } catch (e) { return false; }
   }
 
-  if (session()) home(); else signIn();
+  if (session()) home(); else if (location.hash === "#signup") signUp(); else signIn();
 })();

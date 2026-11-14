@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>try{var t=localStorage.getItem("pulse-theme");document.documentElement.dataset.theme=t||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark")}catch(e){document.documentElement.dataset.theme="dark"}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page not found · Pulse</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0b0b0e">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/img/favicon-32.png" sizes="32x32" type="image/png">
+<style>
+:root { --bg: #0b0b0e; --surface: #16161b; --border: #2c2c36; --text: #ededf1; --muted: #a3a3b0; color-scheme: dark; }
+html[data-theme="light"] { --bg: #f7f6fb; --surface: #ffffff; --border: #dcd8e8; --text: #1b1a20; --muted: #5d5a6e; color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: var(--bg); color: var(--text); font: 400 1rem/1.6 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Arial, sans-serif; padding: 1.5rem; }
+main { max-width: 34rem; text-align: center; }
+.home svg { width: 44px; height: 44px; }
+h1 { font-size: clamp(1.8rem, 6vw, 2.6rem); font-weight: 650; letter-spacing: -.02em; line-height: 1.15; margin: 1.4rem 0 .6rem; color: var(--muted); }
+h1 b { color: var(--text); font-weight: inherit; }
+p { color: var(--muted); margin: 0 0 1.8rem; }
+.row { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 1.3rem; border-radius: 999px; text-decoration: none; font-weight: 600; font-size: .95rem; }
+.primary { background: var(--text); color: var(--bg); }
+.ghost { color: var(--text); border: 1px solid var(--border); }
+.btn:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+</style>
+<script defer src="/stats.js"></script>
+</head>
+<body>
+<main>
+  <a class="home" href="/" aria-label="Pulse home">
+    <svg viewBox="0 0 30 30" aria-hidden="true"><rect width="30" height="30" rx="8" fill="#7c3aed"/><g fill="#fff"><rect x="7" y="12" width="2.4" height="6" rx="1.2"/><rect x="11" y="8.5" width="2.4" height="13" rx="1.2"/><rect x="15" y="6" width="2.4" height="18" rx="1.2"/><rect x="19" y="10" width="2.4" height="10" rx="1.2"/><rect x="23" y="13" width="2.4" height="4" rx="1.2"/></g></svg>
+  </a>
+  <h1>This page skipped a beat. <b>It doesn't exist.</b></h1>
+  <p>The link may be old, or the address has a typo.</p>
+  <div class="row">
+    <a class="btn primary" href="/">Go to the home page</a>
+    <a class="btn ghost" href="/docs/">Read the docs</a>
+  </div>
+</main>
+</body>
+</html>

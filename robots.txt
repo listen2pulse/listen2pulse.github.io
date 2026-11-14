@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /account/
+Disallow: /p.html
+Disallow: /u.html
+
+Sitemap: https://listen2pulse.github.io/sitemap.xml
