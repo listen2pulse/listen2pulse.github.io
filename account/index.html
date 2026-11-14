@@ -18,7 +18,7 @@
 :root { --bg: #0b0b0e; --surface: #16161b; --surface-2: #1d1d24; --border: #2c2c36; --text: #ededf1; --muted: #a3a3b0; --accent: #7c3aed; --accent-soft: #a78bfa; --bad: #ffb4c2; --good: #86efac; color-scheme: dark; }
 html[data-theme="light"] { --bg: #f7f6fb; --surface: #ffffff; --surface-2: #f0eef7; --border: #dcd8e8; --text: #1b1a20; --muted: #5d5a6e; --accent-soft: #6d28d9; --bad: #b4233c; --good: #15803d; color-scheme: light; }
 * { box-sizing: border-box; }
-body { margin: 0; min-height: 100vh; background: radial-gradient(80% 60% at 50% 0%, rgba(124, 58, 237, .22), transparent 70%), var(--bg); color: var(--text); font: 400 1rem/1.6 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Arial, sans-serif; padding: 1.5rem; }
+body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); font: 400 1rem/1.6 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Arial, sans-serif; padding: 1.5rem; }
 main { max-width: 34rem; margin: 0 auto; padding-bottom: 3rem; }
 .home { display: inline-flex; align-items: center; gap: .55rem; color: var(--text); text-decoration: none; font-weight: 700; font-size: 1.1rem; }
 .home svg { width: 30px; height: 30px; }
@@ -34,7 +34,7 @@ input:focus, textarea:focus { outline: 2px solid var(--accent-soft); outline-off
 .row { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin-top: 1rem; }
 button, .b { font-family: inherit; font-size: .95rem; font-weight: 600; line-height: 1.2; padding: .75rem 1.2rem; border-radius: 10px; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: .4rem; }
 button:hover, .b:hover { border-color: var(--accent-soft); }
-button.main { background: linear-gradient(180deg, #8b5cf6, #7c3aed); border-color: transparent; color: #fff; }
+button.main { background: var(--accent); border-color: transparent; color: #fff; }
 button.main:hover { filter: brightness(1.08); }
 button.danger { color: var(--bad); }
 button.main.danger { background: #b4233c; color: #fff; }

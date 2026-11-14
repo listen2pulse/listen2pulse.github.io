@@ -51,6 +51,27 @@
   var list = $(".tabs");
   if (list) {
     var tabs = [].slice.call(list.querySelectorAll('[role="tab"]'));
+    // The section takes a soft wash of colour from the artwork on show, like the app's
+    // album pages: the vivid pixels of the screenshot, averaged.
+    var section = list.closest("section");
+    var tint = function (panel) {
+      var img = panel && panel.querySelector("img");
+      if (!img || !section) return;
+      if (!img.complete || !img.naturalWidth) { img.addEventListener("load", function () { tint(panel); }, { once: true }); return; }
+      try {
+        var c = document.createElement("canvas"), w = 64, h = Math.max(1, Math.round(64 * img.naturalHeight / img.naturalWidth));
+        c.width = w; c.height = h;
+        var x = c.getContext("2d", { willReadFrequently: true });
+        x.drawImage(img, 0, 0, w, h);
+        var d = x.getImageData(0, 0, w, h).data, r = 0, g = 0, b = 0, n = 0;
+        for (var i = 0; i < d.length; i += 4) {
+          var mx = Math.max(d[i], d[i + 1], d[i + 2]), mn = Math.min(d[i], d[i + 1], d[i + 2]);
+          var wgt = mx < 40 ? 0 : (mx - mn) / 255; // skip the app's dark background, favour colour
+          r += d[i] * wgt; g += d[i + 1] * wgt; b += d[i + 2] * wgt; n += wgt;
+        }
+        if (n > 0) section.style.setProperty("--art", "rgb(" + Math.round(r / n) + " " + Math.round(g / n) + " " + Math.round(b / n) + ")");
+      } catch (e) {}
+    };
     var pill = list.querySelector(".tab-pill");
     var place = function (t) {
       pill.style.width = t.offsetWidth + "px";
@@ -64,6 +85,7 @@
         document.getElementById(o.getAttribute("aria-controls")).hidden = !on;
       });
       place(t);
+      tint(document.getElementById(t.getAttribute("aria-controls")));
       if (focus) t.focus();
     };
     tabs.forEach(function (t, i) {
@@ -76,6 +98,7 @@
       });
     });
     var start = function () { place(tabs.filter(function (t) { return t.getAttribute("aria-selected") === "true"; })[0] || tabs[0]); };
+    tint(document.querySelector('[role="tabpanel"]:not([hidden])'));
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(start);
     start();
     addEventListener("resize", start);

@@ -74,8 +74,8 @@
 
   // ------------------------------------------------------------------ Look
   var css = [
-    ".ask-fab{position:fixed;right:20px;bottom:20px;z-index:50;display:flex;align-items:center;gap:.5rem;padding:.75rem 1.1rem;border:0;border-radius:999px;background:#7c3aed;color:#fff;font:600 .95rem/1 inherit;font-family:inherit;box-shadow:0 10px 30px rgba(124,58,237,.45)}",
-    ".ask-fab:hover{background:#6d28d9}.ask-fab:focus-visible,.ask button:focus-visible,.ask a:focus-visible,.ask textarea:focus-visible,.ask input:focus-visible{outline:3px solid #a78bfa;outline-offset:2px}",
+    ".ask-fab{position:fixed;right:20px;bottom:20px;z-index:50;display:flex;align-items:center;gap:.5rem;padding:.75rem 1.1rem;border:1px solid #2c2c36;border-radius:999px;background:#16161b;color:#ededf1;font:600 .95rem/1 inherit;font-family:inherit;box-shadow:0 8px 24px rgba(0,0,0,.4);transition:border-color .2s,background-color .2s}",
+    ".ask-fab:hover{background:#1d1d24;border-color:#4a4a56}.ask-fab:focus-visible,.ask button:focus-visible,.ask a:focus-visible,.ask textarea:focus-visible,.ask input:focus-visible{outline:3px solid #a78bfa;outline-offset:2px}",
     ".ask{margin:0;padding:0;position:fixed;right:20px;bottom:84px;z-index:50;width:min(380px,calc(100vw - 24px));max-height:min(600px,calc(100vh - 110px));display:flex;flex-direction:column;background:#16161b;color:#ededf1;border:1px solid #2c2c36;border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.6);overflow:hidden;font-size:.95rem}",
     ".ask[hidden]{display:none}.ask-head{display:flex;align-items:center;gap:.6rem;padding:14px 16px;border-bottom:1px solid #2c2c36;background:#0f0f13}",
     ".ask-head b{flex:1}.ask-x{background:none;border:0;color:#a3a3b0;font-size:1.4rem;line-height:1;padding:4px 8px;border-radius:8px}.ask-x:hover{color:#fff;background:#1d1d24}",
@@ -94,7 +94,7 @@
     ".ask-done{display:flex;gap:10px;align-items:flex-start;color:#bbf7d0}.ask-done svg{flex:none;width:26px;height:26px;padding:4px;border-radius:50%;background:#14532d;color:#86efac}.ask-done b{color:#fff}.ask-done p{margin:2px 0 0;color:#d4d4dc}.ask-done a{color:#c4b5fd}",
     ".ask-wait{margin:0;font-size:.85rem;color:#c4b5fd}.ask-wait[hidden]{display:none}.ask-send:disabled{cursor:not-allowed}",
     ".ask-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}",
-    "@media (max-width:520px){.ask{right:12px;bottom:76px}.ask-fab{right:12px;bottom:12px}}"
+    "@media (max-width:520px){.ask{right:12px;bottom:76px}.ask-fab{right:12px;bottom:12px;width:48px;height:48px;padding:0;justify-content:center}.ask-fab-text{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}}"
   ].join("");
 
   function el(tag, attrs, html) {
@@ -109,7 +109,7 @@
   document.head.appendChild(style);
 
   var fab = el("button", { class: "ask-fab", type: "button", "aria-expanded": "false", "aria-controls": "ask-panel" },
-    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg>Ask about Pulse');
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg><span class="ask-fab-text">Ask about Pulse</span>');
   var panel = el("div", { class: "ask", id: "ask-panel", role: "dialog", "aria-label": "Ask about Pulse", hidden: "" });
   panel.innerHTML =
     '<div class="ask-head"><b>Ask about Pulse</b><button class="ask-x" type="button" aria-label="Close">×</button></div>' +
