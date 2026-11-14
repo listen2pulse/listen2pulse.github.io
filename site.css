@@ -89,3 +89,15 @@ html.theme-fade, html.theme-fade * { transition: background-color .3s ease, colo
 .launch-sound.on .i-on { display: block; }
 .launch figcaption { margin-top: .4rem; font-size: .78rem; color: var(--muted); }
 [data-theme="light"] .ask-fab:hover { background: #f3f3f7; border-color: #b9b9c6; }
+
+/* ---------- Smooth movement ---------- */
+/* Lenis does the smooth scrolling where it runs (smooth.js); the browser's own would fight it. */
+html.lenis { scroll-behavior: auto !important; }
+/* Pages cross-fade into each other (browsers that support it), unless motion is reduced. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root) { animation: .22s cubic-bezier(.4, 0, 1, 1) both vt-out; }
+  ::view-transition-new(root) { animation: .32s cubic-bezier(.2, .7, .2, 1) both vt-in; }
+  @keyframes vt-out { to { opacity: 0; } }
+  @keyframes vt-in { from { opacity: 0; transform: translateY(8px); } }
+}
